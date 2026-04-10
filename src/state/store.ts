@@ -34,6 +34,7 @@ type TaskPatch = Partial<
 >;
 
 interface AppStore extends AppData {
+  hydrateData: (data: AppData) => void;
   setTheme: (theme: "light" | "dark") => void;
   setLocale: (locale: "pt-BR" | "en-US") => void;
   addProject: (name: string) => string | null;
@@ -93,6 +94,7 @@ function persist(setter: (state: AppStore) => Partial<AppStore>) {
 export const useAppStore = create<AppStore>((set, get) => ({
   ...persisted,
 
+  hydrateData: (data) => persist(() => ({ ...data }))(set),
   setTheme: (theme) => persist(() => ({ theme }))(set),
   setLocale: (locale) => persist(() => ({ locale }))(set),
 

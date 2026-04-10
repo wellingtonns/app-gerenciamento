@@ -1,7 +1,13 @@
 import { AppData, PersistedState } from "../types";
 import { STORAGE_KEY, STORAGE_VERSION, migratePersistedState } from "./migrations";
+import { saveRemoteState } from "./remoteState";
 
 let debounceTimer: number | null = null;
+let remoteSyncEnabled = false;
+
+export function setRemoteSyncEnabled(enabled: boolean): void {
+  remoteSyncEnabled = enabled;
+}
 
 export function loadState(): AppData {
   try {
@@ -29,6 +35,9 @@ export function saveState(data: AppData): void {
         data
       };
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      if (remoteSyncEnabled) {
+        void saveRemoteState(data);
+      }
     } catch {
       // Ignore persistence failures (quota/private mode) and keep app functional.
     }

@@ -76,6 +76,41 @@ Parar:
 docker compose down
 ```
 
+## Deploy de Produção (Vercel + Turso)
+
+### 1) Criar banco gratuito no Turso (5GB free)
+
+1. Crie conta em: `https://turso.tech`
+2. Crie um database (ex.: `app-gerenciamento-prod`)
+3. Gere um token de acesso
+4. Copie:
+   - `TURSO_DATABASE_URL`
+   - `TURSO_AUTH_TOKEN`
+
+### 2) Configurar variáveis no Vercel
+
+No projeto da Vercel, configure:
+
+```bash
+TURSO_DATABASE_URL=libsql://...
+TURSO_AUTH_TOKEN=...
+APP_STATE_KEY=global
+```
+
+### 3) Deploy no Vercel
+
+1. Importe o repositório no Vercel.
+2. Framework: `Vite` (já definido em `vercel.json`).
+3. Faça deploy.
+
+### 4) Persistência de dados
+
+O app usa a rota serverless `api/state.ts`:
+- `GET /api/state` carrega o estado salvo
+- `PUT /api/state` persiste as alterações
+
+Com isso, os dados ficam centralizados no Turso e acessíveis de qualquer lugar.
+
 ## Estrutura de Pastas (resumo)
 
 ```text
