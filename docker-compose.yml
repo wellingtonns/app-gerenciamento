@@ -1,0 +1,7 @@
+services:
+  app-gerenciamento:
+    build: .
+    container_name: app-gerenciamento
+    ports:
+      - "8085:80"
+    restart: unless-stopped
