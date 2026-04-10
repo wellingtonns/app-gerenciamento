@@ -22,6 +22,27 @@ async function ensureSchema() {
   `);
 }
 
+async function readJsonBody(req: any): Promise<any> {
+  if (req?.body && typeof req.body === "object") {
+    return req.body;
+  }
+
+  if (typeof req?.body === "string" && req.body.length) {
+    return JSON.parse(req.body);
+  }
+
+  const chunks: Buffer[] = [];
+  await new Promise<void>((resolve, reject) => {
+    req.on("data", (chunk: Buffer) => chunks.push(chunk));
+    req.on("end", () => resolve());
+    req.on("error", (error: Error) => reject(error));
+  });
+
+  const raw = Buffer.concat(chunks).toString("utf-8").trim();
+  if (!raw) return {};
+  return JSON.parse(raw);
+}
+
 export default async function handler(req: any, res: any) {
   try {
     await ensureSchema();
@@ -38,7 +59,7 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === "PUT") {
-      const payload = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body ?? {};
+      const payload = await readJsonBody(req);
       const data = payload?.data;
       if (!data) {
         return res.status(400).json({ error: "Missing 'data' payload." });

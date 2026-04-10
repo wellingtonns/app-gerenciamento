@@ -14,18 +14,23 @@ export async function loadRemoteState(): Promise<AppData | null> {
     const migrated = migratePersistedState({ version: Number.MAX_SAFE_INTEGER, data: payload.data as AppData });
     return migrated.data;
   } catch {
+    console.error("[sync] Falha ao carregar estado remoto.");
     return null;
   }
 }
 
 export async function saveRemoteState(data: AppData): Promise<void> {
   try {
-    await fetch("/api/state", {
+    const response = await fetch("/api/state", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data })
     });
+    if (!response.ok) {
+      const payload = await response.text();
+      console.error("[sync] Falha ao salvar estado remoto:", response.status, payload);
+    }
   } catch {
-    // Keep app functional when API is unavailable.
+    console.error("[sync] Falha de rede ao salvar estado remoto.");
   }
 }
